@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Utilizadores - Supermercado Online</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header, footer {
+            text-align: center;
+            padding: 10px;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+            background-color: #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .botao-adicionar {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .botao-adicionar:hover {
+            background-color: #45a049;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .acoes {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .botao-editar {
+            text-decoration: none;
+            color: white;
+            background-color: #008CBA;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .botao-editar:hover {
+            background-color: #007BB5;
+        }
+
+        .botao-remover {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .botao-remover:hover {
+            background-color: #d32f2f;
+        }
+
+        .form-remover {
+            margin: 0;
+            padding: 0;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Gestão de Utilizadores</h1>
+        <p>Gerencie os funcionários e outros utilizadores</p>
+    </header>
+
+    <nav>
+        <a href="{% url 'home' %}">Início</a>
+        <a href="{% url 'gestor_lista' %}">Produtos</a>
+        <a href="{% url 'lista_utilizadores' %}">Utilizadores</a>
+        <a href="{% url 'listar_encomendas' %}">Encomendas</a>
+        <a href="{% url 'listar_transacoes' %}">Transações</a>
+        
+        {% if request.session.user_id %}
+            <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </nav>
+
+    <section class="container">
+        <!-- Seção de Funcionários -->
+        <h2>Funcionários</h2>
+        <a href="{% url 'adicionar_utilizador' %}" class="botao-adicionar">Adicionar Funcionário</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Cargo</th>
+                    <th>Função</th>
+                    <th>Email</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for funcionario in funcionarios %}
+                <tr>
+                    <td>{{ funcionario.nome }}</td>
+                    <td>{{ funcionario.tipo_utilizador }}</td>
+                    <td>{{ funcionario.funcoes }}</td>
+                    <td>{{ funcionario.email }}</td>
+                    <td class="acoes">
+                        <a href="{% url 'editar_funcionario' funcionario.utilizador_id %}" class="botao-editar">Editar</a>
+                        <form action="{% url 'remover_funcionario' funcionario.utilizador_id %}" method="post" class="form-remover">
+                            {% csrf_token %}
+                            <button type="submit" class="botao-remover">Apagar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">Nenhum funcionário encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Seção de Outros Utilizadores -->
+        <h2>Outros Utilizadores</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for utilizador in utilizadores %}
+                <tr>
+                    <td>{{ utilizador.nome }}</td>
+                    <td>{{ utilizador.tipo_utilizador }}</td>
+                    <td>{{ utilizador.email }}</td>
+                    <td>{{ utilizador.telefone }}</td>
+                    <td class="acoes">
+                        <!-- Botão para editar funcionário -->
+                        <a href="{% url 'editar_funcionario' utilizador.utilizador_id %}"
+                            class="botao-editar">Editar</a>
+
+                        <!-- Botão para remover funcionário -->
+                        <form action="{% url 'remover_funcionario' utilizador.utilizador_id %}" method="post"
+                            class="form-remover">
+                            {% csrf_token %}
+                            <button type="submit" class="botao-remover">Apagar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">Nenhum utilizador encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Supermercado Online - Todos os Direitos Reservados</p>
+    </footer>
+
+</body>
+
+</html>

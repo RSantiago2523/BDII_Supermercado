@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho de Compras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header,
+        footer {
+            text-align: center;
+            padding: 10px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .carrinho {
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-carrinho {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .item-carrinho h3 {
+            margin: 0;
+        }
+
+        .item-carrinho p {
+            margin: 5px 0;
+        }
+
+        button.remover {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button.confirmar-compra {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button.confirmar-compra:hover {
+            background-color: #45a049;
+        }
+
+        button.remover:hover {
+            background-color: #e60000;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Estilos para tipo de entrega e morada */
+        .tipo-entrega {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .radio-label {
+            display: block;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .morada-div {
+            margin-top: 15px;
+            display: block;
+        }
+
+        .morada-div input {
+            padding: 8px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Supermercado Online</h1>
+        <p>Compre com facilidade e receba em casa!</p>
+    </header>
+
+    <!-- Navbar -->
+    <nav>
+        <nav>
+            <a href="{% url 'home' %}">Início</a>
+        <a href="{% url 'lista_produtos' %}">Produtos</a>
+        <a href="{% url 'visualizar_carrinho' %}">Carrinho</a>
+        <a href="{% url 'visualizar_encomendas' %}">Minhas Encomendas</a>  <!-- Novo link para as encomendas -->
+        
+            
+            {% if request.session.user_id %}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </nav>
+    </nav>
+
+    <section class="carrinho">
+        {% if carrinho %}
+        <h2>Itens no Carrinho:</h2>
+        {% for item in carrinho.values %}
+        <div class="item-carrinho">
+            <h3>{{ item.produto_nome }}</h3>
+            <p>Quantidade: {{ item.quantidade }}</p>
+            <p>
+                {% if item.desconto > 0 %}
+                    Preço: <span style="text-decoration: line-through; color: red;"> {{ item.preco }} €</span>
+                    <span style="color: green; font-weight: bold;">  {{ item.preco_com_desconto }} €</span>
+                {% else %}
+                    Preço:  {{ item.preco }}€
+                {% endif %}
+            </p>
+            <p>Total do Item:  {{ item.total_item }} €</p>
+            
+            <a href="{% url 'remover_do_carrinho' produto_id=item.produto_id %}">
+                <button class="remover">Remover</button>
+            </a>
+        </div>
+        {% endfor %}
+        
+        <h3>Total Geral:  {{ total }} €</h3>
+
+        <!-- Formulário para confirmar compra -->
+        <form method="POST" action="{% url 'confirmar_compra' %}">
+            {% csrf_token %}
+            
+            <!-- Tipo de Entrega -->
+            <fieldset class="tipo-entrega">
+                <legend>Escolha o tipo de entrega:</legend>
+                <label class="radio-label">
+                    <input type="radio" name="tipo_entrega" value="entrega" checked onclick="toggleMorada()"> Entrega
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="tipo_entrega" value="recolha" onclick="toggleMorada()"> Recolha
+                </label>
+            </fieldset>
+
+            <!-- Morada (só exibida se o tipo de entrega for "entrega") -->
+            <div id="morada-div" class="morada-div">
+                <label for="morada">Morada de entrega:</label>
+                <input type="text" name="morada" id="morada" value="{{ utilizador.morada }}">
+            </div>
+
+            <!-- Botão de confirmação -->
+            <button type="submit" class="confirmar-compra">Confirmar Compra</button>
+        </form>
+    
+        {% else %}
+        <p>O carrinho está vazio.</p>
+        {% endif %}
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Supermercado Online - Todos os Direitos Reservados</p>
+    </footer>
+
+    <script>
+        // Função JavaScript para alternar a visibilidade do campo de morada
+        function toggleMorada() {
+            var tipoEntrega = document.querySelector('input[name="tipo_entrega"]:checked').value;
+            var moradaDiv = document.getElementById('morada-div');
+            if (tipoEntrega === 'entrega') {
+                moradaDiv.style.display = 'block';  // Exibe o campo de morada
+            } else {
+                moradaDiv.style.display = 'none';  // Esconde o campo de morada
+            }
+        }
+
+        // Chama a função para garantir que o estado inicial esteja correto
+        window.onload = toggleMorada;
+    </script>
+
+</body>
+
+</html>

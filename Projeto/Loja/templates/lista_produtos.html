@@ -1,0 +1,258 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermercado Online - Produtos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+    
+        header, footer {
+            text-align: center;
+            padding: 10px;
+        }
+    
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+    
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+    
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+    
+        header {
+            background-color: #4CAF50;
+            color: white;
+        }
+    
+        .produtos {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 20px;
+        }
+    
+        .produto {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            margin: 10px;
+            text-align: center;
+            position: relative;
+        }
+    
+        .produto img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+    
+        .preco-original {
+            text-decoration: line-through;
+            color: red;
+            font-size: 14px;
+        }
+    
+        .preco-promocional {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+    
+        .etiqueta-desconto {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    
+        .botao-adicionar {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    
+        .botao-adicionar:hover {
+            background-color: #45a049;
+        }
+    
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    
+        /* Estilo do filtro de categorias */
+        .filtro {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+    
+        .filtro form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px; /* Limita a largura do filtro */
+        }
+    
+        .filtro label {
+            margin-right: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+    
+        .filtro select {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            width: 200px;
+            margin-right: 10px;
+            transition: border-color 0.3s;
+        }
+    
+        .filtro select:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+    
+        .filtro button {
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            min-width: 120px; /* Garantir que o botão tenha tamanho adequado */
+        }
+    
+        .filtro button:hover {
+            background-color: #45a049;
+        }
+    
+        /* Responsividade para telas menores */
+        @media (max-width: 600px) {
+            .filtro form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+    
+            .filtro select, .filtro button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+    
+</head>
+
+<body>
+
+    <header>
+        <h1>Supermercado Online</h1>
+        <p>Compre com facilidade e receba em casa!</p>
+    </header>
+
+    <nav>
+        <a href="{% url 'home' %}">Início</a>
+        <a href="{% url 'lista_produtos' %}">Produtos</a>
+        <a href="{% url 'visualizar_carrinho' %}">Carrinho</a>
+        <a href="{% url 'visualizar_encomendas' %}">Minhas Encomendas</a>  <!-- Link para encomendas -->
+
+        {% if request.session.user_id %}
+            <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </nav>
+
+    <!-- Filtro de Categorias -->
+    <section class="filtro">
+        <form method="GET" action="{% url 'lista_produtos' %}">
+            <label for="categoria">Escolha a Categoria:</label>
+            <select name="categoria" id="categoria">
+                <option value="">Selecione uma categoria</option>
+                {% for categoria in categorias %}
+                    <option value="{{ categoria.0 }}" {% if categoria.0 == request.GET.categoria %}selected{% endif %}>
+                        {{ categoria.0 }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit">Filtrar</button>
+        </form>
+    </section>
+
+    <section class="produtos">
+        {% for produto in produtos %}
+        <div class="produto">
+            {% if produto.desconto > 0 %}
+                <span class="etiqueta-desconto">-{{ produto.desconto }}%</span>
+            {% endif %}
+            <img src="{% static 'images/default.jpg' %}" alt="{{ produto.produto_nome }}">
+            <h3>{{ produto.produto_nome }}</h3>
+            <p>Categoria: {{ produto.categoria }}</p>
+            <p>Quantidade disponível: {{ produto.quantidade }}</p>
+            
+            {% if produto.desconto > 0 %}
+                <p class="preco-original"> {{ produto.preco }} €</p>
+                <p class="preco-promocional"> {{ produto.preco_com_desconto }} €</p>
+            {% else %}
+                <p class="preco-promocional"> {{ produto.preco }} €</p>
+            {% endif %}
+            
+            <a href="{% url 'detalhes_produto' produto_id=produto.produto_id %}" class="botao-adicionar">Ver Detalhes</a>
+            <a href="{% url 'adicionar_ao_carrinho' produto.produto_id %}" class="botao-adicionar">Adicionar ao Carrinho</a>
+        </div>
+        {% endfor %}
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Supermercado Online - Todos os Direitos Reservados</p>
+    </footer>
+
+</body>
+
+</html>

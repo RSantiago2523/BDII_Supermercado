@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Produto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header,
+        footer {
+            text-align: center;
+            padding: 10px;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Gestão de Produtos</h1>
+        <p>Aumentar o estoque de produtos facilmente</p>
+    </header>
+
+    <nav>
+        <a href="{% url 'home' %}">Início</a>
+        <a href="{% url 'gestor_lista' %}">Produtos</a>
+        <a href="{% url 'lista_utilizadores' %}">Funcionarios</a>
+        <a href="{% url 'listar_encomendas' %}">Encomendas</a>
+        
+        <!-- Botão de login/logout -->
+        {% if request.session.user_id %}
+            <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        <h1>Adicionar Produto</h1>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="fornecedor_id">Fornecedor (ID)</label>
+                <select name="fornecedor_id" required>
+                    {% for id in utilizadores %}
+                    <option value="{{ id }}">{{ id }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="nome">Nome do Produto</label>
+                <input type="text" name="nome" placeholder="Nome do produto" required>
+
+                <label for="descricao">Descrição</label>
+                <textarea name="descricao" rows="4" placeholder="Descrição do produto"></textarea>
+
+                <label for="preco">Preço</label>
+                <input type="number" step="0.01" name="preco" placeholder="Preço do produto" required>
+
+                <label for="categoria">Categoria</label>
+                <input type="text" name="categoria" placeholder="Categoria do produto" required>
+
+                <label for="quantidade">Quantidade</label>
+                <input type="number" step="0.01" name="quantidade" placeholder="Quantidade em estoque" required>
+
+                <button type="submit">Adicionar Produto</button>
+            </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Supermercado Online - Todos os Direitos Reservados</p>
+    </footer>
+</body>
+
+</html>

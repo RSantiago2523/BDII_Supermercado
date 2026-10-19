@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Encomendas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .container {
+            margin: 20px auto;
+            max-width: 1200px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .encomenda {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            overflow: hidden;
+        }
+
+        .encomenda-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .seta {
+            cursor: pointer;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .seta.ativo {
+            transform: rotate(180deg);
+        }
+
+        .encomenda-detalhes {
+            display: none;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #ddd;
+        }
+
+        .encomenda-detalhes.ativo {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        .total {
+            font-weight: bold;
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .botao-apagar {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .botao-entregar {
+            background-color: green;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Supermercado Online</h1>
+        <p>Compre com facilidade e receba em casa!</p>
+    </header>
+
+    <!-- Navbar -->
+    <nav>
+        <a href="{% url 'home' %}">Início</a>
+        <a href="{% url 'gestor_lista' %}">Produtos</a>
+        <a href="{% url 'lista_utilizadores' %}">Utilizadores</a>
+        <a href="{% url 'listar_encomendas' %}">Encomendas</a>
+        <a href="{% url 'listar_transacoes' %}">Transações</a>
+
+        {% if request.session.user_id %}
+        <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Lista de Encomendas</h1>
+
+        <!-- Exibir encomendas dos clientes -->
+        {% for encomenda in dados_encomendas %}
+        <div class="encomenda">
+            <div class="encomenda-header">
+                <div>
+                    <h2>Encomenda ID: {{ encomenda.encomenda_id }}</h2>
+                    <p>Utilizador ID: {{ encomenda.utilizador_id }}</p>
+                    <p>Data: {{ encomenda.data_encomenda }}</p>
+                    <p>Estado: {{ encomenda.estado }}</p>
+                    <p>Tipo de Entrega: {{ encomenda.tipo_entrega }}</p>  <!-- Tipo de Entrega -->
+                    {% if encomenda.tipo_entrega != 'recolha' %}
+                    <p>Morada: {{ encomenda.morada }}</p>  <!-- Exibe a morada apenas se o tipo de entrega não for 'Recolha' -->
+                {% endif %}
+                </div>
+                <span class="seta">🔽</span>
+            </div>
+
+            <div class="encomenda-detalhes">
+                <h3>Itens:</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produto ID</th>
+                            <th>Produto Nome</th>
+                            <th>Quantidade</th>
+                            <th>Preço Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in encomenda.itens %}
+                        <tr>
+                            <td>{{ item.produto_id }}</td>
+                            <td>{{ item.produto_nome }}</td>
+                            <td>{{ item.quantidade }}</td>
+                            <td> {{ item.preco_total }}€</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p class="total"><strong>Total da Encomenda:</strong>  {{ encomenda.total }}€</p>
+
+                <!-- Botões de ações -->
+                <form method="POST" action="{% url 'excluir_encomenda' encomenda.encomenda_id %}"
+                    style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="botao-apagar">Excluir Encomenda</button>
+                </form>
+
+                <form method="POST" action="{% url 'marcar_como_entregue' encomenda.encomenda_id %}"
+                    style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="botao-entregar">Marcar como Entregue</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Exibir encomendas dos fornecedores -->
+        <div class="container">
+            <h2>Encomendas dos Fornecedores</h2>
+            {% for encomenda in dados_encomendas_fornecedores %}
+            <div class="encomenda">
+                <div class="encomenda-header">
+                    <div>
+                        <h3>Encomenda ID: {{ encomenda.encomenda_id }}</h3>
+                        <p>Utilizador ID: {{ encomenda.utilizador_id }}</p>
+                        <p>Data: {{ encomenda.data_encomenda }}</p>
+                        <p>Estado: {{ encomenda.estado }}</p>
+                    </div>
+                    <span class="seta">🔽</span>
+                </div>
+                <div class="encomenda-detalhes">
+                    <h3>Produto:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produto ID</th>
+                                <th>Produto Nome</th>
+                                <th>Quantidade</th>
+                                <th>Preço Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ encomenda.produto_id }}</td>
+                                <td>{{ encomenda.produto_nome }}</td>
+                                <td>{{ encomenda.quantidade }}</td>
+                                <td> {{ encomenda.preco_total }}€</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <form method="POST" action="{% url 'excluir_encomenda_fornecedor' encomenda.encomenda_id %}"
+                        style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="botao-apagar">Excluir Encomenda</button>
+                    </form>
+
+                    <form method="POST" action="{% url 'marcar_como_entregue_fornecedor' encomenda.encomenda_id %}"
+                        style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="botao-entregar">Marcar como Entregue</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const botoesSeta = document.querySelectorAll(".seta");
+
+            botoesSeta.forEach(seta => {
+                seta.addEventListener("click", function () {
+                    const detalhes = this.closest(".encomenda").querySelector(".encomenda-detalhes");
+                    detalhes.classList.toggle("ativo");
+                    this.classList.toggle("ativo");
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

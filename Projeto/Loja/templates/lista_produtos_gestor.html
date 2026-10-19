@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Produtos - Supermercado Online</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            /* Faz com que o body ocupe toda a altura da tela */
+        }
+
+        .produtos {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 50px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            /* Garantir que o rodapé não fique sobreposto */
+            flex: 1;
+            /* Faz com que a seção de produtos ocupe o máximo de espaço disponível */
+        }
+
+        /* Estilos do cabeçalho e navegação */
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        /* Melhorando a tabela para ocupar mais espaço */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Aumentando os espaçamentos das células */
+        th,
+        td {
+            padding: 18px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Ajustando os botões */
+        .botao-apagar,
+        .botao-atualizar {
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .botao-apagar {
+            background-color: #f44336;
+        }
+
+        .botao-apagar:hover {
+            background-color: #d32f2f;
+        }
+
+        .botao-atualizar {
+            background-color: #4CAF50;
+        }
+
+        .botao-atualizar:hover {
+            background-color: #388E3C;
+        }
+
+        /* Ajustando os inputs dentro da tabela */
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        /* Melhorando a disposição dos botões */
+        .botoes-operacoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* Estilos do rodapé */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+            clear: both;
+            /* Garantir que o rodapé não sobreponha o conteúdo */
+            width: 100%;
+            margin-top: auto;
+            /* Faz o rodapé ir para o final da página */
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        .botao-adicionar {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .botao-adicionar:hover {
+            background-color: #45a049;
+        }
+
+        th:last-child,
+        td:last-child,
+        th:nth-last-child(2),
+        td:nth-last-child(2) {
+            width: 170px;
+            text-align: center;
+        }
+
+        /* Ajuste para a coluna de desconto */
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 150px;
+            text-align: center;
+        }
+
+        /* Campo de desconto */
+        input[name="desconto"] {
+            width: 50px;
+            text-align: center;
+        }
+
+        /* Alinha o campo de estoque e o botão de atualizar lado a lado */
+        .campo-atualizar {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Ajusta o tamanho do input do estoque */
+        .campo-atualizar input {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+        }
+
+        /* Botão de atualizar e desconto */
+        .botao-atualizar {
+            padding: 5px 8px;
+        }
+
+        /* Ajusta os botões de apagar */
+        .botao-apagar {
+            width: 100%;
+        }
+    </style>
+
+
+</head>
+
+<body>
+
+    <header>
+        <h1>Gestão de Produtos</h1>
+        <p>Aumentar o estoque de produtos facilmente</p>
+    </header>
+
+    <nav>
+        <a href="{% url 'home' %}">Início</a>
+        <a href="{% url 'gestor_lista' %}">Produtos</a>
+        <a href="{% url 'lista_utilizadores' %}">Utilizadores</a>
+        <a href="{% url 'listar_encomendas' %}">Encomendas</a>
+        <a href="{% url 'listar_transacoes' %}">Transações</a>
+
+        {% if request.session.user_id %}
+        <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+    </nav>
+
+    <section class="produtos">
+        <h2>Lista de Produtos</h2>
+        <!-- Botão para adicionar produto -->
+        <a href="{% url 'adicionar_produto' %}" class="botao-adicionar">Adicionar Produto</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Fornecedor</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th>Desconto (%)</th>
+                    <th>Preço Final</th>
+                    <th>Categoria</th>
+                    <th>Quantidade</th>
+                    <th colspan="2">Operações</th> <!-- Une as colunas no cabeçalho -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for produto in produtos %}
+                <tr>
+                    <td>{{ produto.produto_nome }}</td>
+                    <td>{{ produto.fornecedor_nome }}</td>
+                    <td>{{ produto.descricao }}</td>
+                    <td>{{ produto.preco }}</td>
+
+                    <!-- Campo de desconto -->
+                    <td>
+                        <form method="POST" action="{% url 'atualizar_desconto' produto.produto_id %}">
+                            {% csrf_token %}
+                            <input type="number" name="desconto" value="{{ produto.desconto }}" min="0" max="100"
+                                required>
+                            <button type="submit" class="botao-atualizar">Aplicar</button>
+                        </form>
+                    </td>
+
+                    <!-- Preço final com desconto aplicado -->
+                    <td>{{ produto.preco_com_desconto }}</td>
+
+                    <td>{{ produto.categoria }}</td>
+                    <td>{{ produto.quantidade }}</td>
+
+                    <td>
+                        <form method="POST" action="{% url 'atualizar_estoque' produto.produto_id %}">
+                            {% csrf_token %}
+                            <div class="campo-atualizar">
+                                <input type="number" name="quantidade" placeholder="Qtd" required min="1" step="1">
+                                <button type="submit" class="botao-atualizar">Atualizar</button>
+                            </div>
+                        </form>
+                    </td>
+
+                    <!-- Apagar produto -->
+                    <td>
+                        <form method="POST" action="{% url 'remove_produto' produto.produto_id %}" class="form-remove">
+                            {% csrf_token %}
+                            <button type="submit" class="botao-apagar">Apagar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+    </section>
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteForms = document.querySelectorAll('.form-remove');
+
+            deleteForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    // Apenas exibe um alerta de confirmação antes de enviar
+                    const confirmed = confirm("Tem certeza de que deseja remover este produto? Todas as encomendas associadas serão apagadas.");
+                    if (!confirmed) {
+                        event.preventDefault(); // Cancela o envio se o usuário não confirmar
+                    }
+                });
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>

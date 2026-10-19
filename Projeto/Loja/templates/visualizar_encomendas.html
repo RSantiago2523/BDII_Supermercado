@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Encomendas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header,
+        footer {
+            text-align: center;
+            padding: 10px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .encomendas {
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .encomenda {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .encomenda h3 {
+            margin: 0;
+        }
+
+        .encomenda p {
+            margin: 5px 0;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .btn-detalle {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn-detalle:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Supermercado Online</h1>
+        <p>Minhas Encomendas</p>
+    </header>
+
+    <!-- Navbar -->
+    <nav>
+        <nav>
+            <a href="{% url 'home' %}">Início</a>
+        <a href="{% url 'lista_produtos' %}">Produtos</a>
+        <a href="{% url 'visualizar_carrinho' %}">Carrinho</a>
+        <a href="{% url 'visualizar_encomendas' %}">Minhas Encomendas</a>  <!-- Novo link para as encomendas -->
+        
+
+            {% if request.session.user_id %}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </nav>
+    </nav>
+
+    <section class="encomendas">
+        <h2>Encomendas Realizadas:</h2>
+
+        {% if encomendas %}
+            {% for encomenda in encomendas %}
+            <div class="encomenda">
+                <h3>Encomenda ID: {{ encomenda.encomenda_id }}</h3>
+                <p><strong>Data: </strong>{{ encomenda.data_encomenda }}</p>
+                <p><strong>Status: </strong>{{ encomenda.estado }}</p>
+                <p><strong>Total: </strong> {{ encomenda.total }}€</p>
+                <a href="{% url 'detalhes_encomenda' encomenda.encomenda_id %}" class="btn-detalle">Ver Detalhes</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>Você ainda não fez nenhuma encomenda.</p>
+        {% endif %}
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Supermercado Online - Todos os Direitos Reservados</p>
+    </footer>
+
+</body>
+
+</html>
